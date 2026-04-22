@@ -1,0 +1,39 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Socio {
+  id                String    @id @default(uuid())
+  nombre            String
+  email             String    @unique
+  password          String
+  telefono          String?
+  rol               Rol       @default(SOCIO)
+  estado_membresia  Estado    @default(ACTIVE)
+  especialidad      String?
+  salario           Float?
+  fecha_registro    DateTime  @default(now())
+  clases_restantes  Int       @default(0)
+  fecha_vencimiento DateTime?
+  tipo_plan         String?
+  ultimo_pago       DateTime?
+
+  @@map("socios")
+}
+
+enum Rol {
+  ADMIN
+  SOCIO
+  TRAINER
+  RECEPCION
+}
+
+enum Estado {
+  ACTIVE
+  INACTIVE
+  PENDING
+}

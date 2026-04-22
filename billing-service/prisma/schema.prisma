@@ -1,0 +1,34 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Membresia {
+  id          String   @id @default(uuid())
+  tipo        String   @unique  // 👈 único cambio
+  precio      Float
+  descripcion String?
+  creado_en   DateTime @default(now())
+
+  pagos       Pago[]
+
+  @@map("membresias")
+}
+
+model Pago {
+  id           String    @id @default(uuid())
+  socio_id     String
+  membresia_id String
+  monto        Float
+  estado       String    @default("PENDIENTE")
+  fecha_pago   DateTime?
+  fecha_vence  DateTime
+  creado_en    DateTime  @default(now())
+
+  membresia    Membresia @relation(fields: [membresia_id], references: [id])
+
+  @@map("pagos")
+}

@@ -1,0 +1,68 @@
+generator client {
+  provider                = "prisma-client-js"
+  output                  = "../src/generated/prisma"
+  generatedFileExtension  = "js"
+  moduleFormat            = "commonjs"
+}
+
+datasource db {
+  provider = "postgresql"
+  
+}
+
+model Reserva {
+  id                 String           @default(uuid()) @db.Uuid
+  socio_id           String           @db.Uuid
+  clase_instancia_id String           @map("clase_instancia_id") @db.Uuid
+  estado             booking_status?  @default(CONFIRMED)
+  fecha_creacion     DateTime         @default(now()) @map("fecha_creacion") @db.Timestamptz(6)
+  clases_instancia   clases_instancia @relation(fields: [clase_instancia_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@id([id, fecha_creacion])
+  @@index([socio_id], map: "idx_bookings_socio")
+  @@map("bookings")
+}
+
+model clases {
+  id          String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  nombre      String  @db.VarChar(100)
+  descripcion String?
+}
+
+model clases_instancia {
+  id                String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  clase_id          String    @db.Uuid
+  
+  // ✅ CAMPOS PARA EL PANEL DE CONTROL
+  nombre_clase      String    @db.VarChar(100) 
+  trainer_id        String    @db.Uuid         
+  trainer_nombre    String    @db.VarChar(100) 
+  sede_nombre       String    @db.VarChar(100) 
+
+  sede_id           String    @db.Uuid
+  fecha_inicio      DateTime  @db.Timestamptz(6)
+  fecha_fin         DateTime  @db.Timestamptz(6)
+  capacidad_total   Int
+  cupos_disponibles Int
+  version           Int?      @default(0)
+  bookings          Reserva[]
+
+  @@index([fecha_inicio, sede_id], map: "idx_clases_fecha")
+  @@map("clases_instancia")
+}
+
+model outbox_events {
+  id             String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  aggregate_type String    @db.VarChar(50)
+  aggregate_id   String    @db.Uuid
+  event_type     String    @db.VarChar(50)
+  payload        Json
+  created_at     DateTime? @default(now()) @db.Timestamptz(6)
+  processed      Boolean?  @default(false)
+}
+
+enum booking_status {
+  CONFIRMED
+  CANCELLED
+  ATTENDED
+}

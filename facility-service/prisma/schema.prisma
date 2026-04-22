@@ -1,0 +1,64 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider = "postgresql"
+  
+}
+
+// --- ENUMS ---
+enum EstadoEquipo {
+  OPERATIVO        // Disponible para el socio
+  MANTENIMIENTO    // En reparación, no se cuenta como disponible
+  FUERA_DE_SERVICIO // Dado de baja
+}
+
+enum CategoriaArea {
+  CARDIO
+  MUSCULACION
+  FUNCIONAL
+  BOXEO
+}
+
+// --- MODELOS ---
+
+model Sede {
+  id               String   @id @default(uuid())
+  nombre           String   @unique
+  direccion        String
+  ciudad           String   @default("Montería")
+  
+  // Gestión de Horarios y Capacidad
+  hora_apertura    String   @default("06:00")
+  hora_cierre      String   @default("22:00")
+  capacidad_max    Int      @default(50)
+  
+  // 🔥 Nuevo campo para el Admin BFF
+  ocupacion_actual Int      @default(0) 
+
+  esta_activa      Boolean  @default(true)
+  
+  // Relación: Una sede tiene muchos equipos
+  equipos          Equipo[]
+
+  @@map("sedes")
+}
+
+model Equipo {
+  id                String        @id @default(uuid())
+  nombre            String
+  marca             String?
+  area              CategoriaArea @default(CARDIO)
+  estado            EstadoEquipo  @default(OPERATIVO)
+  serial_number     String?       @unique
+  
+  ultima_revision   DateTime      @default(now())
+  proxima_revision  DateTime?
+  
+  sede_id           String
+  sede              Sede          @relation(fields: [sede_id], references: [id])
+
+  @@map("equipos")
+}
