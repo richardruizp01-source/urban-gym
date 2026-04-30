@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-// --- URLs DE LOS MICROSERVICIOS (CORREGIDO PARA APUNTAR AL BACKEND) ---
+// --- URLs DE LOS MICROSERVICIOS ---
 const MEMBERS = 'http://localhost:3001/api/v1/members';
 const BOOKING = 'http://localhost:3003/api/v1/bookings';
 const BILLING = 'http://localhost:3006/api/v1/billing';
@@ -16,9 +16,27 @@ const headers = () => ({
 export const login = (data: { email: string; password: string }) =>
   axios.post(`${MEMBERS}/login`, data);
 
-// Ahora Ismael viajará al puerto 3001 y Prisma podrá guardarlo
 export const register = (data: any) =>
   axios.post(`${MEMBERS}/register`, data);
+
+// --- COACH / ENTRENADOR ---
+
+/**
+ * Obtiene los alumnos asignados al coach actual.
+ * Conecta con la ruta router.get("/my-students", ...) del backend.
+ */
+export const getMyStudents = () => 
+  axios.get(`${MEMBERS}/my-students`, headers());
+
+export const getAlumnosByCoach = (coachId: string) =>
+  axios.get(`${MEMBERS}/coach/${coachId}/alumnos`, headers());
+
+export const getDetalleAlumno = (socioId: string) =>
+  axios.get(`${MEMBERS}/${socioId}/ficha-tecnica`, headers());
+
+// --- FICHA TÉCNICA (PROGRESO) ---
+export const actualizarFichaSocio = (socio_id: string, data: any) =>
+  axios.put(`${MEMBERS}/${socio_id}/ficha-tecnica`, data, headers());
 
 // --- MEMBRESÍAS ---
 export const getMembresias = () =>
@@ -57,10 +75,15 @@ export const generarQR = (id: string) =>
 export const getReservasBySocio = (socio_id: string) =>
   axios.get(`${BOOKING}/socio/${socio_id}`, headers());
 
-// --- FICHA TÉCNICA (PROGRESO) ---
-export const actualizarFichaSocio = (socio_id: string, data: any) =>
-  axios.put(`${MEMBERS}/${socio_id}/ficha-tecnica`, data, headers());
+// --- RUTINAS ---
+export const enviarRutina = (alumno_id: string, data: { contenido: any; objetivo: string }) =>
+  axios.post(`${MEMBERS}/${alumno_id}/rutinas`, data, headers());
 
-// --- RUTINAS RECIBIDAS ---
-export const getMisRutinas = (socio_id: string) =>
-  axios.get(`${MEMBERS}/${socio_id}/rutinas`, headers());
+export const getRutinasAlumno = (alumno_id: string) =>
+  axios.get(`${MEMBERS}/${alumno_id}/rutinas`, headers());
+
+export const eliminarRutina = (alumno_id: string, rutina_id: string) =>
+  axios.delete(`${MEMBERS}/${alumno_id}/rutinas/${rutina_id}`, headers());
+
+export const getInstanciasByEntrenador = (trainer_id: string) =>
+  axios.get(`${BOOKING}/instancias/entrenador/${trainer_id}`, headers());

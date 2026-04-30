@@ -1,13 +1,13 @@
 generator client {
-  provider                = "prisma-client-js"
-  output                  = "../src/generated/prisma"
-  generatedFileExtension  = "js"
-  moduleFormat            = "commonjs"
+  provider               = "prisma-client-js"
+  output                 = "../src/generated/prisma"
+  generatedFileExtension = "js"
+  moduleFormat           = "commonjs"
 }
 
 datasource db {
   provider = "postgresql"
-  
+ 
 }
 
 model Reserva {
@@ -30,15 +30,15 @@ model clases {
 }
 
 model clases_instancia {
-  id                String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   clase_id          String    @db.Uuid
-  
-  // ✅ CAMPOS PARA EL PANEL DE CONTROL
-  nombre_clase      String    @db.VarChar(100) 
-  trainer_id        String    @db.Uuid         
-  trainer_nombre    String    @db.VarChar(100) 
-  sede_nombre       String    @db.VarChar(100) 
 
+  // ✅ CAMPOS PARA EL PANEL DE CONTROL
+  nombre_clase      String    @db.VarChar(100)
+  trainer_id        String    @db.Uuid
+  trainer_nombre    String    @db.VarChar(100)
+  sede_nombre       String    @db.VarChar(100)
+  descripcion       String?   @db.VarChar(300)
   sede_id           String    @db.Uuid
   fecha_inicio      DateTime  @db.Timestamptz(6)
   fecha_fin         DateTime  @db.Timestamptz(6)
@@ -52,7 +52,7 @@ model clases_instancia {
 }
 
 model outbox_events {
-  id             String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   aggregate_type String    @db.VarChar(50)
   aggregate_id   String    @db.Uuid
   event_type     String    @db.VarChar(50)

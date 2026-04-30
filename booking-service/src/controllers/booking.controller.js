@@ -141,7 +141,8 @@ const createClaseInstancia = async (req, res) => {
   try {
     const { 
       clase_id, nombre_clase, trainer_id, trainer_nombre, 
-      sede_id, sede_nombre, capacidad_total, fecha_inicio, fecha_fin
+      sede_id, sede_nombre, capacidad_total, fecha_inicio, fecha_fin,
+      descripcion
     } = req.body;
 
     const nuevaInstancia = await prisma.clases_instancia.create({
@@ -150,6 +151,7 @@ const createClaseInstancia = async (req, res) => {
         nombre_clase, trainer_id, trainer_nombre,
         sede_id: sede_id || "77f72671-654a-4f9e-8c85-6932470768f5",
         sede_nombre,
+        descripcion: descripcion || null,
         fecha_inicio: new Date(fecha_inicio),
         fecha_fin: new Date(fecha_fin),
         capacidad_total: parseInt(capacidad_total) || 20,
@@ -164,16 +166,32 @@ const createClaseInstancia = async (req, res) => {
   }
 };
 
-// 8. OBTENER RESERVAS POR SOCIO 👈 NUEVA
+// 8. OBTENER RESERVAS POR SOCIO
 const getReservasBySocio = async (req, res) => {
   const { socio_id } = req.params;
   try {
     const reservas = await prisma.reserva.findMany({
-      where: { socio_id, estado: 'CONFIRMED' }
+      where: { socio_id, estado: 'CONFIRMED' },
+      include: { clases_instancia: true }
     });
     res.json({ success: true, data: reservas });
   } catch (error) {
     console.error("❌ Error en getReservasBySocio:", error.message);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// 9. OBTENER INSTANCIAS POR ENTRENADOR
+const getInstanciasByEntrenador = async (req, res) => {
+  const { trainer_id } = req.params;
+  try {
+    const result = await prisma.clases_instancia.findMany({
+      where: { trainer_id },
+      orderBy: { fecha_inicio: 'desc' }
+    });
+    res.json({ success: true, data: result });
+  } catch (error) {
+    console.error("❌ Error en getInstanciasByEntrenador:", error.message);
     res.status(500).json({ error: error.message });
   }
 };
@@ -187,5 +205,6 @@ module.exports = {
   deleteInstancia,
   updateBooking,
   createClaseInstancia,
-  getReservasBySocio // 👈 NUEVA
+  getReservasBySocio,
+  getInstanciasByEntrenador
 };

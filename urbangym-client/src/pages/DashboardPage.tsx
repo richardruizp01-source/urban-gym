@@ -17,13 +17,16 @@ const DashboardPage = () => {
     navigate('/login');
   };
 
-  const menu = [
-    { label: 'Mis Reservas', sub: 'Clases disponibles', icon: '🥊', path: '/reservas', color: 'from-orange-500/20 to-transparent', border: 'hover:border-orange-500/60', glow: 'hover:shadow-[0_0_30px_rgba(249,115,22,0.3)]' },
-    { label: 'Máquinas', sub: 'Estado por sede', icon: '🏋️', path: '/maquinas', color: 'from-blue-500/20 to-transparent', border: 'hover:border-blue-500/60', glow: 'hover:shadow-[0_0_30px_rgba(59,130,246,0.3)]' },
-    { label: 'Sedes', sub: 'Horarios y ubicación', icon: '📍', path: '/sedes', color: 'from-green-500/20 to-transparent', border: 'hover:border-green-500/60', glow: 'hover:shadow-[0_0_30px_rgba(34,197,94,0.3)]' },
-    { label: 'Mis Pagos', sub: 'Historial de membresía', icon: '💳', path: '/pagos', color: 'from-purple-500/20 to-transparent', border: 'hover:border-purple-500/60', glow: 'hover:shadow-[0_0_30px_rgba(168,85,247,0.3)]' },
-    { label: 'Acceso QR', sub: 'Entrada y salida', icon: '📱', path: '/qr', color: 'from-red-500/20 to-transparent', border: 'hover:border-red-500/60', glow: 'hover:shadow-[0_0_30px_rgba(239,68,68,0.3)]' },
-  ];
+ const menu = [
+  { label: 'Clases', sub: 'Todas las disponibles', icon: '🏃', path: '/clases', color: 'from-orange-500/20 to-transparent', border: 'hover:border-orange-500/60', glow: 'hover:shadow-[0_0_30px_rgba(249,115,22,0.3)]' },
+  { label: 'Mis Reservas', sub: 'Mis clases agendadas', icon: '🥊', path: '/reservas', color: 'from-pink-500/20 to-transparent', border: 'hover:border-pink-500/60', glow: 'hover:shadow-[0_0_30px_rgba(236,72,153,0.3)]' },
+  { label: 'Máquinas', sub: 'Estado por sede', icon: '🏋️', path: '/maquinas', color: 'from-blue-500/20 to-transparent', border: 'hover:border-blue-500/60', glow: 'hover:shadow-[0_0_30px_rgba(59,130,246,0.3)]' },
+  { label: 'Sedes', sub: 'Horarios y ubicación', icon: '📍', path: '/sedes', color: 'from-green-500/20 to-transparent', border: 'hover:border-green-500/60', glow: 'hover:shadow-[0_0_30px_rgba(34,197,94,0.3)]' },
+  { label: 'Mis Pagos', sub: 'Historial de membresía', icon: '💳', path: '/pagos', color: 'from-purple-500/20 to-transparent', border: 'hover:border-purple-500/60', glow: 'hover:shadow-[0_0_30px_rgba(168,85,247,0.3)]' },
+  { label: 'Acceso QR', sub: 'Entrada y salida', icon: '📱', path: '/qr', color: 'from-red-500/20 to-transparent', border: 'hover:border-red-500/60', glow: 'hover:shadow-[0_0_30px_rgba(239,68,68,0.3)]' },
+  { label: 'Mi Evolución', sub: 'Body Stats & Ficha', icon: '📈', path: '/progreso', color: 'from-cyan-500/20 to-transparent', border: 'hover:border-cyan-500/60', glow: 'hover:shadow-[0_0_30px_rgba(6,182,212,0.3)]' },
+  { label: 'Mis Rutinas', sub: 'Enviadas por tu coach', icon: '💪', path: '/rutinas', color: 'from-yellow-500/20 to-transparent', border: 'hover:border-yellow-500/60', glow: 'hover:shadow-[0_0_30px_rgba(234,179,8,0.3)]' },
+];
 
   const hora = time.toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
   const fecha = time.toLocaleDateString('es-CO', { weekday: 'long', day: '2-digit', month: 'long' }).toUpperCase();
