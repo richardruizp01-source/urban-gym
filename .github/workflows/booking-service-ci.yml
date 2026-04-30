@@ -1,0 +1,39 @@
+name: Booking Service CI/CD
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'booking-service/**'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'booking-service/**'
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: booking-service
+
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v3
+
+      - name: Instalar Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      - name: Instalar dependencias
+        run: npm install
+
+      - name: Ejecutar pruebas
+        run: npm test
+        env:
+          DATABASE_URL: ${{ secrets.BOOKING_DATABASE_URL }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          INTERNAL_SERVICE_TOKEN: ${{ secrets.INTERNAL_SERVICE_TOKEN }}
