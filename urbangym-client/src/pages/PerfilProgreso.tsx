@@ -35,7 +35,7 @@ const PerfilProgreso = () => {
       if (!user) return;
       try {
         // Ajusta el nombre de la función según tu api.ts
-        const res = await api.getMiPerfil(user.id);
+        const res = await api.getDetalleAlumno(user.id);
         const ficha = res?.data?.data?.ficha_tecnica || res?.data?.ficha_tecnica || null;
         if (ficha) {
           setFichaGuardada(ficha);

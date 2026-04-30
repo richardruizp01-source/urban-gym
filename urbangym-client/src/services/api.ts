@@ -64,3 +64,6 @@ export const actualizarFichaSocio = (socio_id: string, data: any) =>
 // --- RUTINAS RECIBIDAS ---
 export const getMisRutinas = (socio_id: string) =>
   axios.get(`${MEMBERS}/${socio_id}/rutinas`, headers());
+
+export const getDetalleAlumno = (socio_id: string) =>
+  axios.get(`${MEMBERS}/${socio_id}/ficha-tecnica`, headers());
