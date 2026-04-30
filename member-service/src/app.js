@@ -33,3 +33,4 @@ app.listen(PORT, () => {
     console.log(`✅ Member Service (Prisma) listo en: http://localhost:${PORT}`);
     console.log(`🚀 Rutas activas en: http://localhost:${PORT}/api/v1/members`);
 });
+module.exports = app;

@@ -2,9 +2,16 @@ const prisma = require("../config/db");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
-// 1. REGISTRO (ARREGLADO)
-exports.register = async ({ nombre, email, telefono, password, rol, salario, especialidad, tipo_plan }) => {
+// 1. REGISTRO (CON RASTREO DE DATOS PARA SEDE)
+exports.register = async ({ nombre, email, telefono, password, rol, salario, especialidad, tipo_plan, sede_id }) => {
   try {
+    // 🔍 PRUEBA DE ORO: Esto saldrá en tu terminal de VS Code
+    console.log("-----------------------------------------");
+    console.log("🚀 INTENTANDO REGISTRAR TITÁN:");
+    console.log(`   👤 Nombre: ${nombre}`);
+    console.log(`   🏢 ID de Sede recibida: ${sede_id || '⚠️ VIENE VACÍO'}`);
+    console.log("-----------------------------------------");
+
     const hashedPassword = await bcrypt.hash(password, 10);
     
     let rolFinal = (rol || 'SOCIO').toUpperCase();
@@ -14,8 +21,7 @@ exports.register = async ({ nombre, email, telefono, password, rol, salario, esp
     const esSocio = rolFinal === 'SOCIO';
     const hoy = new Date();
     const planFinal = esSocio ? (tipo_plan?.toUpperCase() || 'BASICO') : null;
-    const fechaVencimiento = esSocio ? new Date(hoy.getTime() + 30 * 24 * 60 * 60 * 1000) : null;
-
+    
     const usuario = await prisma.socio.create({
       data: {
         nombre: nombre,
@@ -29,6 +35,7 @@ exports.register = async ({ nombre, email, telefono, password, rol, salario, esp
         tipo_plan: planFinal,
         ultimo_pago: null,
         fecha_vencimiento: null,
+        sede_id: sede_id || null, // 👈 Se guarda en la columna que vimos en tu schema.prisma
       }
     });
 
@@ -43,7 +50,8 @@ exports.register = async ({ nombre, email, telefono, password, rol, salario, esp
 exports.login = async ({ email, password }) => {
   try {
     const user = await prisma.socio.findUnique({
-      where: { email: email } 
+      where: { email: email },
+      include: { sede: true }
     });
 
     if (!user) throw { status: 404, message: "Email no registrado" };
@@ -61,7 +69,14 @@ exports.login = async ({ email, password }) => {
       status: 200, 
       message: "Bienvenido 🔥", 
       token, 
-      user: { id: user.id, nombre: user.nombre, rol: user.rol } 
+      user: { 
+        id: user.id, 
+        nombre: user.nombre, 
+        rol: user.rol, 
+        email: user.email, 
+        sede_id: user.sede_id,
+        sede: user.sede?.nombre || null
+      }
     };
   } catch (error) {
     console.error("❌ Error en login:", error);
@@ -208,18 +223,20 @@ exports.cambiarEstado = async (id, nuevoEstado) => {
   }
 };
 
-// 9. VERIFICAR VENCIMIENTOS (ARREGLADO)
+// 9. VERIFICAR VENCIMIENTOS (CORREGIDO)
 exports.verificarMembresias = async () => {
   try {
     const hoy = new Date();
-    return await prisma.socio.updateMany({
+    // Buscamos socios activos cuya fecha de vencimiento ya pasó
+    const resultado = await prisma.socio.updateMany({
       where: {
         rol: 'SOCIO',
-        estado_membresia: esSocio ? 'INACTIVE' : 'ACTIVE',
+        estado_membresia: 'ACTIVE', // Solo verificamos los que están activos
         fecha_vencimiento: { lt: hoy }
       },
       data: { estado_membresia: 'INACTIVE' }
     });
+    return resultado;
   } catch (error) {
     console.error("❌ Error verificar:", error);
     throw error;

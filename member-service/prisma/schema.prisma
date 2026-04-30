@@ -21,8 +21,46 @@ model Socio {
   fecha_vencimiento DateTime?
   tipo_plan         String?
   ultimo_pago       DateTime?
+  ficha_tecnica     Json?
+
+  sede_id           String?
+  sede              Sede?     @relation(fields: [sede_id], references: [id])
+
+  coach_id          String?
+  coach             Socio?    @relation("CoachStudents", fields: [coach_id], references: [id])
+  students          Socio[]   @relation("CoachStudents")
+
+  // 🔥 NUEVO
+  rutinas_recibidas Rutina[]  @relation("RutinasRecibidas")
+  rutinas_enviadas  Rutina[]  @relation("RutinasEnviadas")
 
   @@map("socios")
+}
+
+model Sede {
+  id        String   @id @default(uuid())
+  nombre    String
+  direccion String?
+  estado    String   @default("ACTIVO")
+  socios    Socio[]
+  @@map("sedes")
+}
+
+// 🔥 NUEVO
+model Rutina {
+  id          String   @id @default(uuid())
+  contenido   Json
+  objetivo    String
+  fecha       DateTime @default(now())
+  leida       Boolean  @default(false)
+
+  alumno_id   String
+  alumno      Socio    @relation("RutinasRecibidas", fields: [alumno_id], references: [id])
+
+  coach_id    String
+  coach       Socio    @relation("RutinasEnviadas", fields: [coach_id], references: [id])
+
+  @@map("rutinas")
 }
 
 enum Rol {

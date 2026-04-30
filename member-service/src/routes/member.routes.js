@@ -4,37 +4,40 @@ const memberController = require("../controllers/member.controller");
 const { verifyToken, isAdmin } = require("../middleware/auth.middleware");
 
 // --- 1. RUTAS COMPLETAMENTE PÚBLICAS (Sin Token) ---
-// Ponemos /trainers al inicio para que Express la encuentre primero
 router.get("/trainers", memberController.getTrainers); 
 router.post("/register", memberController.register); 
 router.post("/login", memberController.login); 
 
+// 🔥 NUEVA: El cliente necesita ver sedes para registrarse
+router.get("/active-branches", memberController.getActiveBranches); 
+
 // --- 2. RUTAS DE ADMINISTRACIÓN (Requieren Token y Admin) ---
+router.patch("/assign-workload", verifyToken, isAdmin, memberController.assignStaffAndBranch);
+
+// --- 2.5 RUTAS PARA EL COACH ---
+router.get("/my-students", verifyToken, memberController.getMyStudents);
+router.post("/:id/rutinas", verifyToken, memberController.enviarRutina);
+router.get("/:id/rutinas", verifyToken, memberController.getRutinas);
+router.delete("/:id/rutinas/:rutina_id", verifyToken, memberController.eliminarRutina);
 
 // Obtener todos los socios para el panel
 router.get("/", verifyToken, isAdmin, memberController.getAll); 
-
-// Registro administrativo
 router.post("/", verifyToken, isAdmin, memberController.register); 
 
 // Suscripción, Estado y Eliminación
 router.post("/subscribe", verifyToken, isAdmin, memberController.subscribe);
 router.patch("/:id/status", verifyToken, isAdmin, memberController.updateStatus);
+router.put("/:id/ficha-tecnica", verifyToken, memberController.updateFichaTecnica);
 router.delete("/:id", verifyToken, isAdmin, memberController.deleteMember); 
 
 // --- 3. RUTAS DE USO / QR ---
-
-// Descontar clase
 router.patch("/:id/use-class", verifyToken, isAdmin, memberController.useClass);
-
-// Generar QR (Cualquier usuario logueado)
 router.get("/:id/qr", verifyToken, memberController.generateAccessQR);
 router.post('/validar-qr', memberController.validarQR);
-// Activar/Desactivar acceso (Llamado por billing-service)
 router.post('/activar-acceso', memberController.activarAcceso);
 
 // --- 4. PERFIL DEL USUARIO LOGUEADO ---
-router.get("/me", verifyToken, memberController.getMe); // 👈 agregado
-// Reset de contraseña
+router.get("/me", verifyToken, memberController.getMe); 
 router.post("/:id/reset-password", verifyToken, isAdmin, memberController.resetPassword);
+
 module.exports = router;

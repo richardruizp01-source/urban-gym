@@ -25,7 +25,7 @@ exports.login = async (req, res) => {
     }
 };
 
-// 3. Obtener todos (ARREGLADO)
+// 3. Obtener todos (MANTENIENDO TU LÓGICA - SOLO AGREGADO SEDE_ID)
 exports.getAll = async (req, res) => {
     try {
         const modeloSocios = prisma.socios || prisma.socio;
@@ -46,7 +46,8 @@ exports.getAll = async (req, res) => {
             tipo_plan: u.tipo_plan,
             fecha_vencimiento: u.fecha_vencimiento,
             ultimo_pago: u.ultimo_pago,
-            teléfono: u.teléfono || u.telefono
+            teléfono: u.teléfono || u.telefono,
+            sede_id: u.sede_id // 👈 Agregado para que Ismael y los demás muestren su sede
         }));
 
         console.log(`✅ Titanes cargados: ${formattedUsers.length}`);
@@ -72,12 +73,12 @@ exports.getMemberById = async (req, res) => {
 exports.useClass = async (req, res) => {
     try {
         const { id } = req.params;
-        const member = await prisma.socio.findUnique({ where: { id } }); // 👈 fix
+        const member = await prisma.socio.findUnique({ where: { id } }); 
         if (!member || member.clases_restantes <= 0) {
             return res.status(400).json({ message: "No quedan clases disponibles." });
         }
 
-        const updated = await prisma.socio.update({ // 👈 fix
+        const updated = await prisma.socio.update({ 
             where: { id: id },
             data: { clases_restantes: { decrement: 1 } }
         });
@@ -87,7 +88,7 @@ exports.useClass = async (req, res) => {
     }
 };
 
-// 6. ACTUALIZAR ESTATUS (Conectado a tu función 'cambiarEstado')
+// 6. ACTUALIZAR ESTATUS
 exports.updateStatus = async (req, res) => {
     try {
         const { id } = req.params;
@@ -100,7 +101,7 @@ exports.updateStatus = async (req, res) => {
     }
 };
 
-// 7. ELIMINAR SOCIO (Conectado a tu función 'deleteMember' del servicio)
+// 7. ELIMINAR SOCIO
 exports.deleteMember = async (req, res) => {
     try {
         const { id } = req.params;
@@ -115,7 +116,7 @@ exports.deleteMember = async (req, res) => {
 exports.generateAccessQR = async (req, res) => {
     try {
         const { id } = req.params;
-        const member = await prisma.socio.findUnique({ // 👈 fix
+        const member = await prisma.socio.findUnique({ 
             where: { id: id },
             select: { id: true, estado_membresia: true, nombre: true }
         });
@@ -186,7 +187,7 @@ exports.validarQR = async (req, res) => {
             return res.status(400).json({ message: "❌ QR expirado." });
         }
 
-        const member = await prisma.socio.findUnique({ // 👈 fix
+        const member = await prisma.socio.findUnique({ 
             where: { id: datos.id },
             select: { id: true, nombre: true, estado_membresia: true }
         });
@@ -227,6 +228,7 @@ exports.activarAcceso = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+
 // 13. PERFIL DEL USUARIO LOGUEADO
 exports.getMe = async (req, res) => {
   try {
@@ -239,13 +241,13 @@ exports.getMe = async (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 };
+
 // 14. RESETEAR CONTRASEÑA (Admin)
 exports.resetPassword = async (req, res) => {
     try {
         const { id } = req.params;
         const bcrypt = require('bcryptjs');
         
-        // Generar contraseña temporal
         const temporal = 'GYM-' + Math.random().toString(36).substring(2, 6).toUpperCase();
         const hashed = await bcrypt.hash(temporal, 10);
 
@@ -258,4 +260,235 @@ exports.resetPassword = async (req, res) => {
     } catch (err) {
         res.status(500).json({ success: false, error: err.message });
     }
+};
+
+// Obtener los alumnos (socios) de la MISMA SEDE que el staff logueado
+exports.getMyStudents = async (req, res) => {
+  try {
+    const coachId = req.user.id;
+    const modeloSocio = prisma.socio || prisma.socios;
+
+    console.log("-----------------------------------------");
+    console.log("🆔 COACH ID:", coachId);
+
+    // 1. Identificar la sede del Staff/Coach actual
+    const coachProfile = await modeloSocio.findUnique({
+      where: { id: coachId },
+      select: { sede_id: true }
+    });
+
+    if (!coachProfile || !coachProfile.sede_id) {
+      console.log("⚠️ Alerta: Staff sin sede asignada.");
+      return res.json({ 
+        status: "success", 
+        data: [], 
+        message: "No tienes una sede vinculada en el sistema." 
+      });
+    }
+
+    console.log("🏢 SEDE DETECTADA:", coachProfile.sede_id);
+
+    // 2. Obtener alumnos de la misma sede incluyendo su FICHA TÉCNICA
+    const students = await modeloSocio.findMany({
+      where: {
+        rol: 'SOCIO',
+        sede_id: coachProfile.sede_id
+      },
+      select: {
+        id: true,
+        nombre: true,
+        email: true,
+        telefono: true,
+        estado_membresia: true,
+        tipo_plan: true,
+        fecha_vencimiento: true,
+        // 🔥 Campo clave que acabamos de crear en Prisma:
+        ficha_tecnica: true, 
+        fecha_registro: true
+      },
+      orderBy: {
+        nombre: 'asc' // Organizados alfabéticamente
+      }
+    });
+
+    console.log(`✅ ${students.length} Titanes enviados al panel de gestión.`);
+    console.log("-----------------------------------------");
+
+    res.json({ 
+      status: "success", 
+      data: students 
+    });
+
+  } catch (error) {
+    console.error("❌ ERROR EN GETMYSTUDENTS:", error.message);
+    res.status(500).json({ 
+      success: false, 
+      error: "Error al obtener la lista de alumnos: " + error.message 
+    });
+  }
+};
+
+// 15. OBTENER SEDES ACTIVAS 
+exports.getActiveBranches = async (req, res) => {
+    try {
+        const modeloSede = prisma.sede || prisma.sedes;
+
+        if (!modeloSede) {
+            return res.status(500).json({ 
+                success: false, 
+                error: "El modelo de Sedes no está definido en el cliente de Prisma." 
+            });
+        }
+
+        const branches = await modeloSede.findMany({
+            where: { 
+                estado: 'ACTIVO' 
+            },
+            select: { 
+                id: true, 
+                nombre: true, 
+                direccion: true 
+            }
+        });
+
+        console.log(`✅ Sedes operativas encontradas: ${branches.length}`);
+        res.json({ success: true, data: branches });
+
+    } catch (error) {
+        console.error("❌ ERROR EN GETACTIVEBRANCHES:", error.message);
+        res.status(500).json({ success: false, error: error.message });
+    }
+};
+
+// 16. ASIGNAR SEDE Y COACH
+exports.assignStaffAndBranch = async (req, res) => {
+    try {
+        const { socio_id, sede_id, coach_id } = req.body;
+        const modeloSocio = prisma.socio || prisma.socios;
+
+        if (!socio_id || !sede_id || !coach_id) {
+            return res.status(400).json({ 
+                success: false, 
+                message: "Faltan datos: socio_id, sede_id y coach_id son obligatorios." 
+            });
+        }
+
+        const updated = await modeloSocio.update({
+            where: { id: socio_id },
+            data: { 
+                sede_id: sede_id,
+                coach_id: coach_id 
+            }
+        });
+
+        console.log(`⚖️ Carga balanceada: ${updated.nombre} reasignado.`);
+        
+        res.json({ 
+            success: true, 
+            message: `Socio ${updated.nombre} asignado correctamente.` 
+        });
+
+    } catch (error) {
+        console.error("❌ ERROR EN ASSIGNSTAFFANDBRANCH:", error.message);
+        res.status(500).json({ success: false, error: error.message });
+    }
+};
+// 17. ACTUALIZAR FICHA TÉCNICA (Socio o Coach)
+exports.updateFichaTecnica = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const fichaData = req.body; // Aquí llega: peso, altura, lesiones, objetivo, etc.
+
+        console.log(`📝 Actualizando ficha técnica del Titán: ${id}`);
+
+        // Usamos el modelo socio (o socios según tu configuración)
+        const modeloSocio = prisma.socio || prisma.socios;
+
+        // Actualizamos al socio. 
+        // Nota: Asegúrate de que en tu schema.prisma el modelo Socio tenga 
+        // un campo llamado 'ficha_tecnica' de tipo Json o campos individuales.
+        const updated = await modeloSocio.update({
+            where: { id: id },
+            data: {
+                // Si guardas todo el objeto como JSON:
+                ficha_tecnica: fichaData, 
+                
+                // Si prefieres campos individuales, tendrías que mapearlos así:
+                // peso: fichaData.peso,
+                // altura: fichaData.altura,
+            }
+        });
+
+        res.json({ 
+            success: true, 
+            message: "✅ Ficha técnica sincronizada con éxito", 
+            data: updated.ficha_tecnica 
+        });
+
+    } catch (error) {
+        console.error("❌ ERROR EN UPDATEFICHATECNICA:", error.message);
+        res.status(500).json({ 
+            success: false, 
+            error: "No se pudo actualizar la ficha: " + error.message 
+        });
+    }
+};
+
+// 18. ENVIAR RUTINA AL ALUMNO
+exports.enviarRutina = async (req, res) => {
+  try {
+    const { id } = req.params; // id del alumno
+    const coach_id = req.user.id;
+    const { contenido, objetivo } = req.body;
+
+    const rutina = await prisma.rutina.create({
+      data: {
+        contenido,
+        objetivo,
+        alumno_id: id,
+        coach_id
+      }
+    });
+
+    res.json({ success: true, message: "✅ Rutina enviada", data: rutina });
+  } catch (error) {
+    console.error("❌ ERROR EN ENVIARRUTINA:", error.message);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+// 19. OBTENER RUTINAS DE UN ALUMNO
+exports.getRutinas = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const rutinas = await prisma.rutina.findMany({
+      where: { alumno_id: id },
+      orderBy: { fecha: 'desc' },
+      include: {
+        coach: { select: { nombre: true } }
+      }
+    });
+
+    res.json({ success: true, data: rutinas });
+  } catch (error) {
+    console.error("❌ ERROR EN GETRUTINAS:", error.message);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+// 20. ELIMINAR RUTINA
+exports.eliminarRutina = async (req, res) => {
+  try {
+    const { rutina_id } = req.params;
+
+    await prisma.rutina.delete({
+      where: { id: rutina_id }
+    });
+
+    res.json({ success: true, message: "🗑️ Rutina eliminada" });
+  } catch (error) {
+    console.error("❌ ERROR EN ELIMINARRUTINA:", error.message);
+    res.status(500).json({ success: false, error: error.message });
+  }
 };
