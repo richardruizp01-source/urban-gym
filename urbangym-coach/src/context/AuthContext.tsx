@@ -1,9 +1,13 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
+import type { ReactNode } from 'react';
 
 interface User {
   id: string;
   nombre: string;
   rol: string;
+  email?: string;
+  sede?: string;
+  sede_id?: string;
   estado_membresia?: string;
   fecha_vencimiento?: string;
 }
