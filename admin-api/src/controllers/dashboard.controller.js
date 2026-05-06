@@ -132,3 +132,22 @@ exports.getStaff = async (req, res) => {
         res.status(500).json({ success: false, error: error.message });
     }
 };
+
+exports.createSede = async (req, res) => {
+    try {
+        const result = await dashboardService.createSede(req.body);
+        res.status(201).json({ success: true, data: result });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+};
+
+exports.updateSedeStatus = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const result = await dashboardService.updateSedeStatus(id, req.body);
+        res.status(200).json({ success: true, data: result });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+};
