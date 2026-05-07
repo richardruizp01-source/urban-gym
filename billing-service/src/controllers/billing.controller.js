@@ -34,7 +34,7 @@ const crearPago = async (req, res) => {
 
     // Notificar al members-service
     try {
-      await axios.post('http://localhost:3001/api/v1/members/activar-acceso', {
+      await axios.post('https://urban-gym-production.up.railway.app/api/v1/members/activar-acceso', {
         socio_id,
         estado: 'ACTIVE',
         membresia: membresia.tipo,
