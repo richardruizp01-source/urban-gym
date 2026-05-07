@@ -52,7 +52,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (!savedToken) return;
 
     try {
-      const res = await fetch('http://localhost:3001/api/v1/members/me', {
+      const res = await fetch('https://urban-gym-production.up.railway.app/api/v1/members/me', {
         headers: { Authorization: `Bearer ${savedToken}` }
       });
       const data = await res.json();
