@@ -1,10 +1,10 @@
 import axios from 'axios';
 
-// --- URLs DE LOS MICROSERVICIOS (CORREGIDO PARA APUNTAR AL BACKEND) ---
-const MEMBERS = 'http://localhost:3001/api/v1/members';
-const BOOKING = 'http://localhost:3003/api/v1/bookings';
-const BILLING = 'http://localhost:3006/api/v1/billing';
-const FACILITIES = 'http://localhost:3002/api/facilities';
+// --- URLs DE LOS MICROSERVICIOS (PRODUCCIÓN RAILWAY) ---
+const MEMBERS = 'https://urban-gym-production.up.railway.app/api/v1/members';
+const BOOKING = 'https://worthy-gratitude-production-47c2.up.railway.app/api/v1/bookings';
+const BILLING = 'https://ingenious-manifestation-production-be58.up.railway.app/api/v1/billing';
+const FACILITIES = 'https://magnificent-spontaneity-production-3f33.up.railway.app/api/facilities';
 
 // --- AUTH ---
 const getToken = () => localStorage.getItem('token');
