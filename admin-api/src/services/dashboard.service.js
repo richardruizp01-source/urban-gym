@@ -153,9 +153,21 @@ exports.updateMaquina = async (id, updateData) => {
     return response.data;
 };
 
-exports.deleteMaquina = async (id) => {
-    const response = await axios.delete(`${FACILITY_URL}/api/facilities/equipos/${id}`, getHeaders());
-    return response.data;
+exports.createSede = async (sedeData) => {
+    // 1. Crear en facility-service
+    const response = await axios.post(`${FACILITY_URL}/api/facilities/sedes`, sedeData, getHeaders());
+    const sedeCreada = response.data;
+    
+    // 2. Sincronizar en member-service
+    try {
+        const sedeSincronizada = sedeCreada.data || sedeCreada;
+        await axios.post(`${MEMBER_URL}/api/v1/members/sedes`, sedeSincronizada, getHeaders());
+        console.log('✅ Sede sincronizada en member-service');
+    } catch (err) {
+        console.log('⚠️ No se pudo sincronizar sede en member-service:', err.message);
+    }
+    
+    return sedeCreada;
 };
 
 exports.createSede = async (sedeData) => {
