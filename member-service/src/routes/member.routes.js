@@ -40,4 +40,7 @@ router.post('/activar-acceso', memberController.activarAcceso);
 router.get("/me", verifyToken, memberController.getMe); 
 router.post("/:id/reset-password", verifyToken, isAdmin, memberController.resetPassword);
 
+// Sincronización de sedes desde admin-api
+router.post("/sedes", verifyToken, isAdmin, memberController.createSede);
+
 module.exports = router;

@@ -492,3 +492,19 @@ exports.eliminarRutina = async (req, res) => {
     res.status(500).json({ success: false, error: error.message });
   }
 };
+
+exports.createSede = async (req, res) => {
+    try {
+        const { id, nombre, direccion } = req.body;
+        const modeloSede = prisma.sede || prisma.sedes;
+        
+        const sede = await modeloSede.create({
+            data: { id, nombre, direccion, estado: 'ACTIVO' }
+        });
+        
+        res.status(201).json({ success: true, data: sede });
+    } catch (error) {
+        console.error("❌ ERROR CREANDO SEDE:", error.message);
+        res.status(500).json({ success: false, error: error.message });
+    }
+};
