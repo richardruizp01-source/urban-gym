@@ -174,3 +174,18 @@ exports.updateSedeStatus = async (id, updateData) => {
     const response = await axios.patch(`${FACILITY_URL}/api/facilities/sedes/${id}/status`, updateData, getHeaders());
     return response.data;
 };
+
+exports.createReserva = async (reservaData) => {
+    const response = await axios.post(`${BOOKING_URL}/api/v1/bookings/instancias`, reservaData);
+    return response.data;
+};
+
+exports.deleteReserva = async (id) => {
+    const response = await axios.delete(`${BOOKING_URL}/api/v1/bookings/instancias/${id}`);
+    return response.data;
+};
+
+exports.getTrainers = async () => {
+    const response = await axios.get(`${MEMBER_URL}/api/v1/members/trainers`);
+    return response.data;
+};

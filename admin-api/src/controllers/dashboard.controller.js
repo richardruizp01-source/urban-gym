@@ -151,3 +151,31 @@ exports.updateSedeStatus = async (req, res) => {
         res.status(500).json({ success: false, error: error.message });
     }
 };
+
+exports.createReserva = async (req, res) => {
+    try {
+        const result = await dashboardService.createReserva(req.body);
+        res.status(201).json({ success: true, data: result });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+};
+
+exports.deleteReserva = async (req, res) => {
+    try {
+        const { id } = req.params;
+        await dashboardService.deleteReserva(id);
+        res.status(200).json({ success: true });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+};
+
+exports.getTrainers = async (req, res) => {
+    try {
+        const result = await dashboardService.getTrainers();
+        res.status(200).json({ success: true, data: result });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+};
