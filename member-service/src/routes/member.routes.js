@@ -24,6 +24,9 @@ router.delete("/:id/rutinas/:rutina_id", verifyToken, memberController.eliminarR
 router.get("/", verifyToken, isAdmin, memberController.getAll); 
 router.post("/", verifyToken, isAdmin, memberController.register); 
 
+// Sincronización de sedes desde admin-api (debe ir ANTES de /:id)
+router.post("/sedes", verifyToken, isAdmin, memberController.createSede);
+
 // Suscripción, Estado y Eliminación
 router.post("/subscribe", verifyToken, isAdmin, memberController.subscribe);
 router.patch("/:id/status", verifyToken, isAdmin, memberController.updateStatus);
@@ -39,8 +42,5 @@ router.post('/activar-acceso', memberController.activarAcceso);
 // --- 4. PERFIL DEL USUARIO LOGUEADO ---
 router.get("/me", verifyToken, memberController.getMe); 
 router.post("/:id/reset-password", verifyToken, isAdmin, memberController.resetPassword);
-
-// Sincronización de sedes desde admin-api
-router.post("/sedes", verifyToken, isAdmin, memberController.createSede);
 
 module.exports = router;
