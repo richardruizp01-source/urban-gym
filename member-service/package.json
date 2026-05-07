@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node src/app.js",
     "dev": "nodemon src/app.js",
+    "postinstall": "prisma generate",
     "test": "jest --forceExit --detectOpenHandles",
     "test:unit": "jest tests/unit --forceExit",
     "test:integration": "jest tests/integration --forceExit",
