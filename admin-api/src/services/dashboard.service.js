@@ -170,11 +170,6 @@ exports.createSede = async (sedeData) => {
     return sedeCreada;
 };
 
-exports.createSede = async (sedeData) => {
-    const response = await axios.post(`${FACILITY_URL}/api/facilities/sedes`, sedeData, getHeaders());
-    return response.data;
-};
-
 exports.updateSedeStatus = async (id, updateData) => {
     const response = await axios.patch(`${FACILITY_URL}/api/facilities/sedes/${id}/status`, updateData, getHeaders());
     return response.data;
